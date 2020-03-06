@@ -1,17 +1,19 @@
 // Matter.js variables extraction
-const { Engine, Render, Runner, World, Bodies } = Matter;
+const { Engine, Render, Runner, World, Bodies, Body } = Matter;
 
 // Variables
-const cells = 10;
+const cells = 20;
 const width = 600;
 const height = 600;
 
 const unitWidth = width / cells;
 const unitHeight = height / cells;
 const wallSize = 3;
+const ballVelocity = 2;
 
 // World configuration and initialization
 const engine = Engine.create();
+engine.world.gravity.y = 0;
 const { world } = engine;
 const render = Render.create({
   element: document.body,
@@ -27,10 +29,10 @@ Runner.run(Runner.create(), engine);
 
 // Walls
 const walls = [
-  Bodies.rectangle(width / 2, 0, width, 40, { isStatic: true }), //top
-  Bodies.rectangle(width / 2, height, width, 40, { isStatic: true }), //bottom
-  Bodies.rectangle(0, height / 2, 40, height, { isStatic: true }), //left
-  Bodies.rectangle(width, height / 2, 40, height, { isStatic: true }) //right
+  Bodies.rectangle(width / 2, 0, width, wallSize, { isStatic: true }), //top
+  Bodies.rectangle(width / 2, height, width, wallSize, { isStatic: true }), //bottom
+  Bodies.rectangle(0, height / 2, wallSize, height, { isStatic: true }), //left
+  Bodies.rectangle(width, height / 2, wallSize, height, { isStatic: true }) //right
 ];
 World.add(world, walls);
 
@@ -152,4 +154,42 @@ verticals.forEach((row, rowIndex) => {
     );
     World.add(world, wall);
   });
+});
+
+// Goal point
+const goal = Bodies.rectangle(
+  width - unitWidth / 2,
+  height - unitHeight / 2,
+  unitWidth * 0.7,
+  unitHeight * 0.7,
+  {
+    isStatic: true,
+    fillColors: "green"
+  }
+);
+World.add(world, goal);
+
+// Ball point
+const ball = Bodies.circle(unitWidth / 2, unitHeight / 2, unitWidth / 5);
+World.add(world, ball);
+
+// Keypress controls
+document.addEventListener("keydown", event => {
+  const { x, y } = ball.velocity;
+  if (event.keyCode === 87) {
+    //up
+    Body.setVelocity(ball, { x, y: y - ballVelocity });
+  }
+  if (event.keyCode === 68) {
+    //right
+    Body.setVelocity(ball, { x: x + ballVelocity, y });
+  }
+  if (event.keyCode === 83) {
+    //down
+    Body.setVelocity(ball, { x, y: y + ballVelocity });
+  }
+  if (event.keyCode === 65) {
+    //left
+    Body.setVelocity(ball, { x: x - ballVelocity, y });
+  }
 });
